@@ -99,12 +99,12 @@ def _get_psql_engin(settings, prefix):
     :return:
     """
     # http://stackoverflow.com/questions/14783505/encoding-error-with-sqlalchemy-and-postgresql
-    engine = engine_from_config(settings, 'sqlalchemy.', connect_args={"options": "-c timezone=utc"}, client_encoding='utf8', isolation_level='SERIALIZABLE', json_serializer=json_serializer)
+    engine = engine_from_config(settings, prefix, connect_args={"options": "-c timezone=utc"}, client_encoding='utf8', isolation_level='SERIALIZABLE', json_serializer=json_serializer)
     return engine
 
 
 def _get_sqlite_engine(settings, prefix):
-    engine = engine_from_config(settings, 'sqlalchemy.', isolation_level='SERIALIZABLE')
+    engine = engine_from_config(settings, prefix, isolation_level='SERIALIZABLE')
     return engine
 
 
