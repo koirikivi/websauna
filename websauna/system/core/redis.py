@@ -78,6 +78,7 @@ def create_redis(registry: Registry, connection_url=None, redis_client=StrictRed
 
         logger.info("Creating a new Redis connection pool. Process %s, thread %s, max_connections %d", process_name, thread_name, max_connections)
 
+        connection_pool = ConnectionPool.from_url(url, max_connections=max_connections, **redis_options)
         redis = AutoReconnectingStrictRedis(connection_pool=connection_pool)
     else:
         raise RuntimeError("Redis connection options missing. Please configure redis.sessions.url")
