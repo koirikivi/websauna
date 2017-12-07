@@ -3,6 +3,7 @@ import logging
 import os
 import threading
 import time
+import socket
 
 from pyramid.events import subscriber, NewRequest
 from redis import StrictRedis
