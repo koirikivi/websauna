@@ -19,37 +19,9 @@ from websauna.compat.typing import Union
 logger = logging.getLogger(__name__)
 
 
-class PessimisticConnectionPool(ConnectionPool):
+class AutoReconnectingStrictRedis(StrictRedis):
     """
-    I am pretty sure he's dead, Jim
-    """
-
-    def get_connection(self, command_name, *keys, **options):
-        "Get a connection from the pool"
-        self._checkpid()
-        try:
-            while True:
-                connection = self._available_connections.pop()
-                last_time = getattr(connection, 'last_checked', 0)
-                if last_time + 180 < time.time():
-                    try:
-                        connection.ping()
-                        connection.last_checked = time.time()
-                        break
-                    except:
-                        logger.exception()
-                        connection.disconnect()
-
-        except IndexError:
-            connection = self.make_connection()
-
-        self._in_use_connections.add(connection)
-        return connection
-
-
-class PessimisticStrictRedis(StrictRedis):
-    """
-    Redo the command exactly once upon socket failure.
+    Redoes the commands exactly once upon socket failure.
     """
 
     # COMMAND EXECUTION AND PROTOCOL PARSING
@@ -106,8 +78,7 @@ def create_redis(registry: Registry, connection_url=None, redis_client=StrictRed
 
         logger.info("Creating a new Redis connection pool. Process %s, thread %s, max_connections %d", process_name, thread_name, max_connections)
 
-        connection_pool = PessimisticConnectionPool.from_url(url, max_connections=max_connections, **redis_options)
-        redis = PessimisticStrictRedis(connection_pool=connection_pool)
+        redis = AutoReconnectingStrictRedis(connection_pool=connection_pool)
     else:
         raise RuntimeError("Redis connection options missing. Please configure redis.sessions.url")
 
