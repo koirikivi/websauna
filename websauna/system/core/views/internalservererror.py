@@ -68,7 +68,6 @@ def internal_server_error(context, request):
                 "env": request.environ,
             })
 
-
     html = render('core/internalservererror.html', {}, request=request)
     resp = Response(html)
     resp.status_code = 500
