@@ -1,12 +1,15 @@
 """The dreaded 500 page."""
 # Standard Library
 import logging
+import sys
 
 # Pyramid
 from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.view import view_config
+
+from pyramid_retry import is_last_attempt
 
 # Websauna
 from websauna.system.core.events import InternalServerError
@@ -45,11 +48,26 @@ def internal_server_error(context, request):
     else:
         request.__dict__["user"] = None
 
-    # Tell Sentry handler to log this exception on sentry
-    request.registry.notify(InternalServerError(context, request))
+    # Don't spam sentry / logger if the error can be retried
+    log_errors = asbool(request.registry.settings.get("websauna.log_internal_server_error", True))
+    if request.tm.get().isRetryableError(context) and not is_last_attempt(request):
+        if log_errors:
+            logger.info("retryable internal server error", extra={
+                "exception": context,
+                "info": sys.exc_info(),
+                "env": request.environ,
+            })
+    else:
+        # Tell Sentry handler to log this exception on sentry
+        request.registry.notify(InternalServerError(context, request))
 
-    if asbool(request.registry.settings.get("websauna.log_internal_server_error", True)):
-        logger.exception(context)
+        if log_errors:
+            logger.exception(context, extra={
+                "exception": context,
+                "info": sys.exc_info(),
+                "env": request.environ,
+            })
+
 
     html = render('core/internalservererror.html', {}, request=request)
     resp = Response(html)
