@@ -90,7 +90,7 @@ setup(
         "python-slugify",  # ASCII slug generation
 
         # Redis
-        "redis>=3.2.0",
+        "redis==2.10.6",
     ],
 
     extras_require={
@@ -127,7 +127,7 @@ setup(
         # Command line utilities and like that are needed to make development / production environment friendly
         'utils': ['pgcli>=2'],
         # Using celery based async tasks
-        'celery': ['celery[redis]>=4.3.0,<5.0.0']
+        'celery': ['celery[redis]>=4.2.0,<4.3.0']  # Celery 4.3.0 wants a newer redis, which seems to break stuff
     },
 
     # To provide executable scripts, use entry points in preference to the
