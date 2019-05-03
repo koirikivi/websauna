@@ -48,6 +48,9 @@ setup(
     zip_safe=False,
     python_requires='>=3.5.2',
     install_requires=[
+        # Pinned versions. It seems that these need to be here on top
+        "psycopg2>=2.7.4,<2.8",  # pgcli wants <2.8
+
         # Pyramid dependencies
         'pyramid>=1.10',
         'transaction>=2.4.0',
@@ -87,7 +90,7 @@ setup(
         "python-slugify",  # ASCII slug generation
 
         # Redis
-        "redis==2.10.6",
+        "redis>=3.2.0",
     ],
 
     extras_require={
@@ -116,6 +119,7 @@ setup(
             'pytest-timeout',
             'pytest<4.0',
             'webtest',
+            'urllib3>=1.21.1,<1.25',  # Pinned version to avoid breaking tests
         ],
         "notebook": [
             "pyramid_notebook>=0.3.0",
@@ -123,7 +127,7 @@ setup(
         # Command line utilities and like that are needed to make development / production environment friendly
         'utils': ['pgcli>=2'],
         # Using celery based async tasks
-        'celery': ['celery[redis]>=4.2.0,<5.0.0']
+        'celery': ['celery[redis]>=4.3.0,<5.0.0']
     },
 
     # To provide executable scripts, use entry points in preference to the
